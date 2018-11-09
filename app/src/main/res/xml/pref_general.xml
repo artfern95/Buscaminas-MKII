@@ -1,0 +1,43 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="Pref_switch"
+        android:summary="@string/orientacionsum"
+        android:title="@string/orientacion" />
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <EditTextPreference
+        android:defaultValue="@string/vancho"
+        android:inputType="number"
+        android:key="Pref_ancho"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/sumancho"
+        android:title="@string/anchope" />
+    <EditTextPreference
+        android:defaultValue="@string/vlargo"
+        android:inputType="number"
+        android:key="Pref_largo"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/sumlargo"
+        android:title="@string/largope" />
+    <EditTextPreference
+        android:defaultValue="@string/vbombas"
+        android:inputType="number"
+        android:key="Pref_bombas"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/sumbomba"
+        android:title="@string/bombaspe" />
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+
+</PreferenceScreen>

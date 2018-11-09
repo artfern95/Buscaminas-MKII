@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/bombasres"
+        android:icon="@drawable/bomb_exploded"
+        android:title=""
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/instruciones"
+        android:title=""
+        android:icon="@drawable/ic_search_black_24dp"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/juego"
+        android:orderInCategory="100"
+        android:title="@string/juego"/>
+    <item
+        android:id="@+id/salir"
+        android:orderInCategory="103"
+        android:title="@string/salir"/>
+    <item
+        android:id="@+id/ajustes"
+        android:orderInCategory="101"
+        android:title="@string/ajustes"/>
+</menu>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/NavBarfacil"
+            android:icon="@drawable/nivel_facil"
+            android:title="@string/facil" />
+        <item
+            android:id="@+id/NavBarmedio"
+            android:icon="@drawable/nivel_medio"
+            android:title="@string/medio" />
+        <item
+            android:id="@+id/NavBardificil"
+            android:icon="@drawable/nivel_dificil"
+            android:title="@string/dificil" />
+    </group>
+
+    <item
+        android:id="@+id/NavBarOpciones"
+        android:title="@string/Opciones">
+        <menu>
+            <item
+                android:id="@+id/IconosClasicos"
+                android:icon="@drawable/number_1"
+                android:title="@string/iconosc" />
+            <item
+                android:id="@+id/IconosMaterialb"
+                android:icon="@drawable/num1"
+                android:title="@string/iconosmb" />
+            <item
+                android:id="@+id/IconosMaterialw"
+                android:icon="@drawable/iconblack"
+                android:title="@string/iconosmw" />
+            <item
+                android:id="@+id/IconosMaterialC"
+                android:icon="@drawable/cnum1"
+                android:title="@string/iconosmc" />
+            <item
+                android:id="@+id/NavBarajustes"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="@string/ajustes" />
+        </menu>
+    </item>
+
+</menu>

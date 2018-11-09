@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="Titulo">Minesweeper MK II</string>
+    <string name="facil">Easy</string>
+    <string name="medio">Medium</string>
+    <string name="dificil">Difficultd</string>
+    <string name="autor">Fernando Arteaga</string>
+    <string name="correo">damluisfernandoa@gmail.com</string>
+    <string name="ajustes">Settings</string>
+    <string name="Opciones">Options</string>
+    <string name="records">Scores</string>
+    <string name="salir">Exit</string>
+    <string name="juego">New Game</string>
+    <string name="iconosc">Classic Icons</string>
+    <string name="iconosmb">Material Black Icons</string>
+    <string name="iconosmw">Material Light Icons</string>
+    <string name="iconosmc">Material Color Icons</string>
+    <string name="fin">End Game</string>
+    <string name="Gana">!You win¡</string>
+    <string name="pregunta">¿Do you want play again?</string>
+    <string name="si">Yes</string>
+    <string name="no">No</string>
+    <string name="puntuacion">Remains Bombs</string>
+    <string name="ajustesg">General</string>
+    <string name="instruciones">Hello, this game is a variant of the minesweeper, the cells behave in the same way as in the original game, if you press a cell it will be shown with a number
+        the bombs you have nearby, if you keep it pressed, and there is a bomb underneath, you will have found a bomb, otherwise the game is over. The game ends when you find all the bombs,Good luck!</string>
+    <string name="tituloins">Guide</string>
+    <string name="ajuestesgen">General</string>
+    <string name="anchope">Custom Width(Max 37 - Min 9)</string>
+    <string name="largope">Custom Height(Max 27 - Min 9)</string>
+    <string name="bombaspe">Nº Bombs(Max 77 - Min 15)</string>
+    <string name="ancho">Introduce width</string>
+    <string name="largo">Introduce height</string>
+    <string name="vancho">9</string>
+    <string name="vlargo">9</string>
+    <string name="vbombas">15</string>
+    <string name="sumancho">value of y</string>
+    <string name="sumlargo">Value of x</string>
+    <string name="sumbomba">Number de bombas</string>
+    <string name="anchotext">Width</string>
+    <string name="largotext">Height</string>
+    <string name="bombas">Bombs</string>
+    <string name="tablero">Generate Grid: </string>
+    <string name="orientacion"></string>
+    <string name="orientacionsum">Change the rotation mode between rotating the board (keep the positions), or invert (the board is shown as in vertical mode)</string>
+</resources>
