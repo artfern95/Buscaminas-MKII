@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 
 import com.fer.dam.buscaminasmkii.Casillas.Celda;
+import com.fer.dam.buscaminasmkii.Casillas.Celdas;
+
+import java.util.ArrayList;
 
 /**
  * Fragment para guardar los datos de la aplicacion durante los cambio en
@@ -15,31 +18,49 @@ import com.fer.dam.buscaminasmkii.Casillas.Celda;
 
 public class SaveInstance extends Fragment {
 
-    private Celda[][] Tablero;
+    private Celdas[][] Tablero;
+
+    private ArrayList<Celdas> Tablero2;
     private int Nivel;
     private int Tipo;
+    private int nbombasres;
     private int Largo;
     private int Ancho;
-    private int nbombasres;
 
     @Override
     public void onCreate( Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
     }
 
-    public void GuardarDatos(final Celda[][] tab,final int tipo, final int nivel, final int largo, final int ancho, int nbomas){
+    public void GuardarDatos(final ArrayList<Celdas> tab, final int tipo, final int nivel, final int nbomas) {
+
+        Tablero2 = tab;
+        Nivel = nivel;
+        Tipo = tipo;
+        nbombasres = nbomas;
+    }
+
+    public void GuardarDatos(final Celdas[][] tab, final int nivel, final int nbomas, final int largo, final int ancho) {
+
+        Tablero = tab;
+        Nivel = nivel;
+        nbombasres = nbomas;
+        Largo = largo;
+        Ancho = ancho;
+    }
+
+    public void GuardarDatos(final Celdas[][] tab, final int tipo, final int nivel, int nbomas) {
 
         Tablero = tab;
         Tipo = tipo;
         Nivel = nivel;
-        Largo = largo;
-        Ancho = ancho;
         nbombasres = nbomas;
     }
 
-    public Celda[][] getTablero(){
+    public Celdas[][] getTablero() {
 
         return Tablero;
     }
@@ -49,22 +70,32 @@ public class SaveInstance extends Fragment {
         return Nivel;
     }
 
+    public int getLargo() {
+        return Largo;
+    }
+
+    public void setLargo(int largo) {
+        Largo = largo;
+    }
+
+    public int getAncho() {
+        return Ancho;
+    }
+
+    public void setAncho(int ancho) {
+        Ancho = ancho;
+    }
+
     public int getTipo() {
 
         return Tipo;
     }
-
-    public int getAncho() {
-
-        return Ancho;
-    }
-
-    public int getLargo() {
-
-        return Largo;
-    }
-
     public int getNbombasres() {
+
         return nbombasres;
+    }
+
+    public ArrayList<Celdas> getTablero2() {
+        return Tablero2;
     }
 }

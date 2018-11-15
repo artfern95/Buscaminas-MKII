@@ -78,4 +78,49 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+
+    <string name="Titulo">Buscaminas MK II</string>
+    <string name="facil">Facíl</string>
+    <string name="medio">Medio</string>
+    <string name="dificil">Dificíl</string>
+    <string name="autor">Fernando Arteaga</string>
+    <string name="correo">damluisfernandoa@gmail.com</string>
+    <string name="ajustes">Ajustes</string>
+    <string name="Opciones">Opciones</string>
+    <string name="records">Puntuaciones</string>
+    <string name="salir">Salir</string>
+    <string name="juego">Juego Nuevo</string>
+    <string name="iconosc">Iconos Clasicos</string>
+    <string name="iconosmb">Iconos Material Black</string>
+    <string name="iconosmw">Iconos Material Light</string>
+    <string name="iconosmc">Iconos Material Color</string>
+    <string name="fin">Fin Del Juego</string>
+    <string name="Gana">!Has ganado¡</string>
+    <string name="pregunta">¿Quieres volver a jugar?</string>
+    <string name="si">si</string>
+    <string name="no">no</string>
+    <string name="puntuacion">Bombas Restantes</string>
+    <string name="ajustesg">Ajustes Generales</string>
+    <string name="instruciones">Hola, este juego es una variante del buscaminas, las celdas se comportan de la misma forma que en el juego original, si pulsas una celda se mostrará con un número
+    las bombas que tiene cerca, si la mantienes pulsada, y debajo hay una bomba, habrás encontrado una bomba, de lo contrario el juego se acaba. El juego finaliza cuando encuentras todas las bombas,
+        ¡Buena suerte!</string>
+    <string name="tituloins">Instrucciones</string>
+    <string name="ajuestesgen">Ajustes generales</string>
+    <string name="anchope">Ancho personalizado(Max 27 - Min 9)</string>
+    <string name="largope">Largo personalizado(Max 37 - Min 9)</string>
+    <string name="bombaspe">Número de bombas(Max 77 - Min 15)</string>
+    <string name="ancho">Introduce el ancho</string>
+    <string name="largo">Introduce el largo</string>
+    <string name="vancho">9</string>
+    <string name="vlargo">9</string>
+    <string name="vbombas">15</string>
+    <string name="sumancho">Valor del eje y</string>
+    <string name="sumlargo">Valor del eje x</string>
+    <string name="sumbomba">Número de bombas</string>
+    <string name="anchotext">Ancho</string>
+    <string name="largotext">Largo</string>
+    <string name="bombas">Bombas</string>
+    <string name="tablero">Creando tablero: </string>
+    <string name="orientacion">Modo de orientación</string>
+    <string name="orientacionsum">Cambia el modo de rotación entre rotar el tablero(conserva las posiciones), o invertir(el tablero se muestra igual que en el modo vertical))</string>
 </resources>

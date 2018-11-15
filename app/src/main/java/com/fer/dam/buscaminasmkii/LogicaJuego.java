@@ -3,18 +3,14 @@ package com.fer.dam.buscaminasmkii;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.widget.GridView;
+import android.view.LayoutInflater;
 
+import com.fer.dam.buscaminasmkii.Adapter.CellAdapter;
 import com.fer.dam.buscaminasmkii.Casillas.Celda;
-import com.fer.dam.buscaminasmkii.Casillas.Iconos.Iconos;
-import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosClasicos;
-import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialBlack;
-import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialColor;
-import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialWhite;
+import com.fer.dam.buscaminasmkii.Casillas.Celdas;
 import com.fer.dam.buscaminasmkii.Constructor.GenerarTablero;
-import com.fer.dam.buscaminasmkii.Constructor.ModosJuego;
-import com.fer.dam.buscaminasmkii.Layout.CustomAdapter;
 
 import java.util.ArrayList;
 
@@ -27,227 +23,107 @@ import java.util.ArrayList;
 
 public class LogicaJuego{
 
-    private static LogicaJuego ourInstance;
+    private static final LogicaJuego ourInstance = new LogicaJuego();
+    private SaveInstance datos;
 
-    public static int Nbombas ;
-    public static int Ancho ;
-    public static int Largo ;
+    private int Nivel = 1;
+    private int TipoIcono = 1;
+    private int ContadorBombas;
+
+    private int Ancho = 8;
+    private int Largo = 8;
+    private int NBombas = 10;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
+    private CellAdapter adapter;
+    //Mapa de valores enteros para inicializar recyclerview
+    private int[][] ValorTablero;
+
+    private boolean CambioDeEstado;
     private Context context;
-    private GridView grid;
-    private Iconos icon;
-    private Celda[][] Tablero;//Tablero principal
-    private Celda[][] tablero;//tablero para guardar las celdas a redibujar
+    //Mapa de Celdas creadas en OnBindViewHolder, clase adapter
+    //private Celdas[][] Tablero;
+    private ArrayList<Celdas> Tablero2;
 
     public static LogicaJuego getInstance() {
 
-        if(ourInstance == null) {
-
-            ourInstance = new LogicaJuego();
-        }
         return ourInstance;
     }
 
     private LogicaJuego() {
-
     }
 
-    public void CrearTablero(Context context, GridView grid){
+    //Inicializador del tablero
 
-        Log.e("Tablero", "Creando tablero de tipo");
+    public void CrearTablero(Context context, SaveInstance datos, RecyclerView.LayoutManager layoutManager, RecyclerView recyclerView, CellAdapter cellAdapter) {
 
+        //Contexto del mainactivity
         this.context = context;
-        this.setGrid(grid);
+        this.datos = datos;
+        this.layoutManager = layoutManager;
+        this.recyclerView = recyclerView;
+        adapter = cellAdapter;
 
-        //Dificultad
+        //Extraemos los valores de la carpeta res, ahi definimos unos valores enteros para cada dificultad
+        setDificultdad();
+        Tablero2 = new ArrayList<>();
+        ValorTablero = new int[Largo][Ancho];
+        ContadorBombas = NBombas;
 
-        switch (MainActivity.nivel){
+        Log.i("Inicio", "Creando Tablero");
 
-            case 1:
-                Ancho = ModosJuego.Anchofacil;
-                Largo = ModosJuego.Largofacil;
-                Nbombas = ModosJuego.Nbombasfacil;
-                break;
-            case 2:
-                Ancho = ModosJuego.Anchomedio;
-                Largo = ModosJuego.Largomedio;
-                Nbombas = ModosJuego.Nbombasmedio;
-                break;
-            case 3:
-                Ancho = ModosJuego.Anchodificil;
-                Largo = ModosJuego.Largodificil;
-                Nbombas = ModosJuego.NBombasdificil;
-                break;
-        }
-
-        //Tema
-
-        switch (MainActivity.tipo) {
-            case 1:
-                icon = new IconosClasicos(context);
-                break;
-            case 2:
-                icon = new IconosMaterialBlack(context);
-                break;
-            case 3:
-                icon = new IconosMaterialWhite(context);
-                break;
-            case 4:
-                icon = new IconosMaterialColor(context);
-                break;
-        }
-
-        Tablero = new Celda[Largo][Ancho];
-        MainActivity.contadorbombas = Nbombas;
-
-        //Genera los valores y la posicion de las bombas
-
-        int [][] valorestablero = GenerarTablero.creatablero(Nbombas,Largo,Ancho);
-        IniciarJuego(context,valorestablero,grid);
+        ValorTablero = GenerarTablero.creatablero(NBombas, Largo, Ancho);
     }
 
-    public void CrearTableroPersonalizado(Context context,GridView grid){
+    public void ReiniciarTablero() {
 
-        switch (MainActivity.tipo) {
-            case 1:
-                icon = new IconosClasicos(context);
-                break;
-            case 2:
-                icon = new IconosMaterialBlack(context);
-                break;
-            case 3:
-                icon = new IconosMaterialWhite(context);
-                break;
-            case 4:
-                icon = new IconosMaterialColor(context);
-                break;
-        }
+        setDificultdad();
 
-        Tablero = new Celda[Largo][Ancho];
-        MainActivity.contadorbombas = Nbombas;
+        ValorTablero = GenerarTablero.creatablero(NBombas, Largo, Ancho);
+        Tablero2.clear();
 
-        int [][] valorestablero = GenerarTablero.creatablero(Nbombas,Largo,Ancho);
-        IniciarJuego(context,valorestablero,grid);
+        adapter = new CellAdapter(context);
+        recyclerView.setAdapter(adapter);
     }
 
-    private void IniciarJuego(Context context,int [][] base, GridView grid){
+    //Control de eventos
 
-        /*Crea las celdas y con el array bidimensional creado anterior mente
-        le asigna el valor, ya sea numero o bomba, a las celdas
-        * */
+    public void Pulsado(int x, int y) {
 
-        Log.i("Tablero","Iniciando Juego");
+        Log.i("Pulsado", "Pos: " + x + " :|: " + y);
 
-        grid.setNumColumns(Largo);
+        if ((x >= 0) && (x < Largo) && (y >= 0) && (y < Ancho) && !getCeldaPos(x, y).getPulsado() && !getCeldaPos(x, y).getPresionado() && !getCeldaPos(x, y).getVisible()) {
 
-        for(int i = 0; i < Largo; i ++){
+            getCeldaPos(x, y).setPulsado();
 
-            for(int e = 0; e < Ancho; e ++) {
+            if (getCeldaPos(x, y).getValor() == 0) {
 
-                Tablero[i][e] = new Celda(context,i,e,icon);
+                for (int i = -1; i <= 1; i++) {
 
-                Tablero[i][e].setValor(base[i][e]);
-                Tablero[i][e].invalidate();
-            }
-        }
+                    for (int e = -1; e <= 1; e++) {
 
-        CustomAdapter gridadapter = new CustomAdapter();
-        grid.setAdapter(gridadapter);
-    }
-
-    public Celda getCeldaPos(int pos){
-
-        int x = 0;
-        int y = 0;
-
-        /*if(MainActivity.orientacion == true && MainActivity.modorotacion == true) {
-            x = pos / Ancho;
-            y = pos % Ancho;
-        }*/
-        //else {
-            x = pos % Largo;
-            y = pos / Largo;
-        //}
-
-        /*boolean fin = false;
-
-        int x = 0;
-        int y = 0;
-        int cont = 0;
-
-        while(fin == false){
-
-            for(int i = 0; i < Ancho; i ++){
-
-                for(int e = 0; e < Largo; e ++){
-
-                    if(cont == pos){
-                        x = e;
-                        y = i;
-
-                        fin = true;
-                    }
-
-                    cont ++;
-                }
-            }
-
-        }*/
-
-        return Tablero[x][y];
-    }
-
-    public Celda getCeldapos(int x, int y){
-
-        return Tablero[x][y];
-    }
-
-    /*Respuesta al onclick, dentro, si la celda es 0 (no tiene bombas cerca)
-    muestra el contenido de las celdas cercanas donde no este cerca una bomba
-    * */
-
-    public void Pulsado(int x, int y){
-
-        Log.i("Pulsado","Pos: "+x+" | "+y);
-
-        if((x >= 0) && (x < Largo) && (y >= 0) && (y < Ancho) && !getCeldapos(x,y).getPulsado() && !getCeldapos(x,y).getPresionado() && !getCeldapos(x,y).getVisible()){
-
-            getCeldapos(x,y).setPulsado();
-
-            if(getCeldapos(x,y).getValor() == 0){
-
-                for(int i = -1; i <= 1; i ++){
-
-                    for(int e = -1; e <= 1; e ++){
-
-                        if(i != e){
+                        if (i != e) {
 
                             Pulsado(x + i, y + e);
-                            Log.i("Pulsado","Siguiente celda: "+x+" | "+y);
+                            Log.i("Pulsado", "Siguiente celda: " + x + " | " + y);
                         }
                     }
                 }
             }
-
-            if(getCeldapos(x,y).getValor()==9){
-                FinDelJuego();
-            }
         }
-
-        //RevisarFin();
     }
-
-    //respuesta al onlongclick
 
     public void Presionado(int x, int y){
 
-        getCeldapos(x,y).setPresionado();
-        getCeldapos(x,y).invalidate();
+        getCeldaPos(x, y).setPresionado();
+        getCeldaPos(x, y).invalidate();
 
-        if(getCeldapos(x,y).getBomba() == true){
+        if (getCeldaPos(x, y).getBomba() == true) {
 
-            getCeldapos(x,y).setVisible();
-            MainActivity.contadorbombas = MainActivity.contadorbombas - 1;
-            Log.i("Presionado","Quedan: "+MainActivity.contadorbombas+" bombas");
+            getCeldaPos(x, y).setVisible();
+            ContadorBombas--;
+            Log.i("Presionado", "Quedan: " + ContadorBombas + " bombas");
             RevisarFin();
         }
 
@@ -257,12 +133,198 @@ public class LogicaJuego{
         }
     }
 
-    public Celda[][] getTablero(){
+    //Métodos para reordenar el tablaero
 
-        return Tablero;
+    //Restablece el tablero despues de algun cambio
+
+    public void CambiarIconos() {
+
+        Log.i("Tablero", "Realizando cambio de iconos: " + TipoIcono);
+
+        for (int i = 0; i < Tablero2.size(); i++) {
+
+            Tablero2.get(i).setIcono(context);
+        }
     }
 
-    //Fin del juego, muestra las posiciones de las bombas escondidas
+    public void RestaurarTablero() {
+
+        Log.i("Tablero", "Restaurando Tablero");
+
+        if (datos != null) {
+
+            CambioDeEstado = true;
+
+            TipoIcono = datos.getTipo();
+            Nivel = datos.getNivel();
+            ContadorBombas = datos.getNbombasres();
+
+            setDificultdad();
+
+            arraylistToArray(datos.getTablero2());
+            adapter = new CellAdapter(context, datos.getTablero2());
+
+            recyclerView.setAdapter(adapter);
+        }
+    }
+
+    public void GuardarTablero() {
+
+        datos.GuardarDatos(Tablero2, TipoIcono, Nivel, ContadorBombas);
+    }
+
+    /*public void RestaurarTableroHV (Boolean horozontal){
+
+        Largo = datos.getAncho();
+        Ancho = datos.getLargo();
+        setTipoIcono(datos.getTipo());
+
+        Tablero = new Celdas[Largo][Ancho];
+        ArrayList<Celdas> lista = new ArrayList<>();
+        Celdas [][] tableroprovisional = datos.getTablero();
+
+        for(int i = 0; i < Ancho; i++){
+
+            for(int e = Largo -1; e >= 0; e --){
+
+                lista.add(tableroprovisional[i][e]);
+            }
+        }
+
+        if(horozontal == true){
+
+            Log.i("Tablero","Restaurando en horozontal");
+
+            int cont = 0;
+
+            for(int i = Largo -1; i >= 0; i --) {
+
+                for(int e = Ancho -1; e >= 0; i --){
+
+                    Tablero[e][i] = lista.get(cont);
+                    cont++;
+                }
+            }
+
+            adapter.notifyDataSetChanged();
+            lista = null;
+        }
+
+        else{
+
+            Log.i("Tablero","Restaurando en vertical");
+
+            int cont = lista.size();
+
+            for(int i = Largo -1; i >= 0; i --) {
+
+                for(int e = Ancho -1; e >= 0; i --){
+
+                    Tablero[e][i] = lista.get(cont);
+                    cont--;
+                }
+            }
+
+            adapter.notifyDataSetChanged();
+            lista = null;
+        }
+    }*/
+
+    //Get y Set especiales
+
+    public void setDificultdad() {
+
+        switch (Nivel) {
+
+            case 1:
+                Ancho = context.getResources().getInteger(R.integer.AnchoFacil);
+                Largo = context.getResources().getInteger(R.integer.LargoFacil);
+                NBombas = context.getResources().getInteger(R.integer.BombasFacil);
+                break;
+            case 2:
+                Ancho = context.getResources().getInteger(R.integer.AnchoMedio);
+                Largo = context.getResources().getInteger(R.integer.LargoMedio);
+                NBombas = context.getResources().getInteger(R.integer.BombasMedio);
+                break;
+            case 3:
+                Ancho = context.getResources().getInteger(R.integer.AnchoDificil);
+                Largo = context.getResources().getInteger(R.integer.LargoDificil);
+                NBombas = context.getResources().getInteger(R.integer.BombasDificil);
+                break;
+            default:
+                Ancho = context.getResources().getInteger(R.integer.AnchoFacil);
+                Largo = context.getResources().getInteger(R.integer.LargoFacil);
+                NBombas = context.getResources().getInteger(R.integer.BombasFacil);
+                break;
+        }
+    }
+
+    public void arraylistToArray(ArrayList<Celdas> tablero) {
+
+        int cont = 0;
+
+        for (int i = 0; i < Largo; i++) {
+
+            for (int e = 0; e < Ancho; e++) {
+
+                ValorTablero[i][e] = tablero.get(i).getValor();
+                cont++;
+            }
+        }
+    }
+
+    public Celda getCeldaPos(int x, int y) {
+
+        int pos = y * Largo + x;
+
+        return Tablero2.get(pos);
+    }
+
+    public Celda getCeldaPos(int pos) {
+
+        return Tablero2.get(pos);
+    }
+
+    /*
+    public Celda getCeldaPos(int x, int y) {
+
+        return Tablero[x][y];
+    }*/
+
+    public int getValorCelda(int posicion) {
+
+        int x = posicion % Largo;
+        int y = posicion / Largo;
+
+        return ValorTablero[x][y];
+    }
+
+    /*
+    public Celdas getCeldaPos(int posicion) {
+
+        int x = posicion % Largo;
+        Log.i("Rv-Valor-x", "|:" + x);
+        int y = posicion / Largo;
+        Log.i("Rv-Valor-y", "|:" + y);
+
+        return Tablero[x][y];
+    }*/
+
+    public void AlmacenarCeldas(Celdas celdas) {
+
+        Tablero2.add(celdas);
+    }
+
+    /*
+    public void AlmacenarCelda(Celdas celda, int posicion) {
+
+        int x = posicion % Largo;
+        int y = posicion / Largo;
+
+        Tablero[x][y] = celda;
+    }*/
+
+    //Díalogos fin del juego y comprobación de fin de juego
 
     public void FinDelJuego () {
 
@@ -270,9 +332,9 @@ public class LogicaJuego{
 
             for(int e = 0; e < Ancho; e ++){
 
-                if(getCeldapos(i,e).getBomba()==true){
-                    getCeldapos(i,e).setVisible();
-                    getCeldapos(i,e).invalidate();
+                if (getCeldaPos(i, e).getBomba() == true) {
+                    getCeldaPos(i, e).setVisible();
+                    getCeldaPos(i, e).invalidate();
                 }
             }
         }
@@ -283,11 +345,13 @@ public class LogicaJuego{
 
     private void RevisarFin(){
 
-        if(MainActivity.contadorbombas == 0){
+        if (ContadorBombas == 0) {
 
             DialogoJuegoFinalizado();
         }
     }
+
+    //Díalogos
 
     private void DialogoJuegoFinalizado(){
 
@@ -301,7 +365,8 @@ public class LogicaJuego{
                 .setPositiveButton(R.string.si,new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
                         dialog.cancel();
-                        CrearTablero(context,grid);
+                        //CrearTablero(context);
+                        ReiniciarTablero();
                     }
                 })
                 .setNegativeButton(R.string.no,new DialogInterface.OnClickListener() {
@@ -327,7 +392,8 @@ public class LogicaJuego{
                 .setPositiveButton(R.string.si,new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int id) {
                         dialog.cancel();
-                        CrearTablero(context,grid);
+                        //CrearTablero(context);
+                        ReiniciarTablero();
                     }
                 })
                 .setNegativeButton(R.string.no,new DialogInterface.OnClickListener() {
@@ -341,188 +407,80 @@ public class LogicaJuego{
         alertDialog.show();
     }
 
-    //Restaura el tablero en los cambios en tiempo de ejecucion
 
-    public void RestaurarTableroVertical(Celda[][]base, GridView view,int tipo, int largo, int ancho, Context context){
+    //Getter and Setters
 
-        Log.i("Tablero","Vertical");
 
-        ArrayList<Celda> lista = new ArrayList<Celda>();
+    public ArrayList<Celdas> getTablero() {
 
-        Largo = ancho;
-        Ancho = largo;
-        MainActivity.tipo = tipo;
-        setGrid(view);
-
-        grid.setNumColumns(Largo);
-
-        Tablero = new Celda[Largo][Ancho];
-
-        for(int i = 0; i < Ancho; i ++){
-
-            for(int e = Largo - 1; e >= 0; e --){
-
-                lista.add(base[i][e]);
-            }
-        }
-
-        int num = lista.size() - 1;
-
-        for(int i = Ancho - 1; i >= 0; i --){
-
-            for(int e = Largo - 1; e >= 0 ; e --){
-
-                Tablero[e][i] = new Celda(context,e,i,icon);
-                Tablero[e][i].setValor(lista.get(num).getValor());
-                Tablero[e][i].setPulsado(lista.get(num).getPulsado());
-                Tablero[e][i].setVisible(lista.get(num).getVisible());
-                Tablero[e][i].setPresionado(lista.get(num).getPresionado());
-                Tablero[e][i].invalidate();
-                num--;
-            }
-        }
+        return Tablero2;
     }
 
-    public void RestaurarTableroHorizontal(Celda[][]base, GridView view,int tipo, int largo, int ancho, Context context){
+    public int getAncho() {
 
-        Log.i("Tablero","Horizontal");
-
-        ArrayList<Celda> lista = new ArrayList<Celda>();
-
-        Largo = ancho;
-        Ancho = largo;
-        MainActivity.tipo = tipo;
-        setGrid(view);
-
-        grid.setNumColumns(Largo);
-
-        Tablero = new Celda[Largo][Ancho];
-
-        for(int e = ancho - 1; e >= 0; e --){
-
-            for(int i = 0; i <  largo; i ++){
-
-                lista.add(base[i][e]);
-            }
-        }
-
-        int num  = 0;
-
-        for(int e = Largo - 1; e >= 0; e --) {
-
-            for (int i = Ancho - 1; i >= 0; i--) {
-
-                Tablero[e][i] = new Celda(context,e,i,icon);
-                Tablero[e][i].setValor(lista.get(num).getValor());
-                Tablero[e][i].setPulsado(lista.get(num).getPulsado());
-                Tablero[e][i].setVisible(lista.get(num).getVisible());
-                Tablero[e][i].setPresionado(lista.get(num).getPresionado());
-                Tablero[e][i].invalidate();
-                num++;
-            }
-        }
-
-        CustomAdapter adapter = new CustomAdapter();
-        grid.setAdapter(adapter);
+        return Ancho;
     }
 
-    public void RestaurarTablero(Celda[][]base, GridView view,int tipo, int largo, int ancho, Context context){
+    public int getLargo() {
 
-        Log.i("Tablero","Restaurando");
+        return Largo;
+    }
+
+    public int getTipoIcono() {
+
+        return TipoIcono;
+    }
+
+    public void setTipoIcono(int tipoIcono) {
+
+        TipoIcono = tipoIcono;
+    }
+
+    public int getNivel() {
+
+        return Nivel;
+    }
+
+    public void setNivel(int nivel) {
+
+        Nivel = nivel;
+    }
+
+    public void setAncho(int ancho) {
+
+        Ancho = ancho;
+    }
+
+    public void setLargo(int largo) {
 
         Largo = largo;
-        Ancho = ancho;
-        setGrid(view);
-        MainActivity.tipo = tipo;
-
-        Tablero = new Celda[Largo][Ancho];
-
-        grid.setNumColumns(Largo);
-
-        switch (MainActivity.tipo) {
-            case 1:
-                icon = new IconosClasicos(context);
-                break;
-            case 2:
-                icon = new IconosMaterialBlack(context);
-                break;
-            case 3:
-                icon = new IconosMaterialWhite(context);
-                break;
-            case 4:
-                icon = new IconosMaterialColor(context);
-                break;
-        }
-
-        for(int i = 0; i < Largo; i ++){
-
-            for(int e = 0; e < Ancho; e ++){
-
-                Tablero[i][e] = new Celda(context,i,e,icon);
-                Tablero[i][e].setValor(base[i][e].getValor());
-                Tablero[i][e].setPulsado(base[i][e].getPulsado());
-                Tablero[i][e].setVisible(base[i][e].getVisible());
-                Tablero[i][e].setPresionado(base[i][e].getPresionado());
-
-                Tablero[i][e].invalidate();
-            }
-        }
-
-        CustomAdapter adapter = new CustomAdapter();
-        grid.setAdapter(adapter);
     }
 
-    //Para el cambio de tema
+    public int getContadorBombas() {
 
-    public void GuardarTablero(GridView grid){
-
-        Log.i("Tablero","Guardando");
-
-        tablero = Tablero;
-        Tablero = new Celda[Largo][Ancho];
-
-        grid.setNumColumns(Largo);
-
-        switch (MainActivity.tipo) {
-            case 1:
-                icon = new IconosClasicos(context);
-                break;
-            case 2:
-                icon = new IconosMaterialBlack(context);
-                break;
-            case 3:
-                icon = new IconosMaterialWhite(context);
-                break;
-            case 4:
-                icon = new IconosMaterialColor(context);
-                break;
-        }
-
-        for(int i = 0; i < Largo; i ++){
-
-            for(int e = 0; e < Ancho; e ++){
-
-                Tablero[i][e] = new Celda(context,tablero[i][e].getXp(),tablero[i][e].getYp(),icon);
-                Tablero[i][e].setValor(tablero[i][e].getValor());
-                Tablero[i][e].setPulsado(tablero[i][e].getPulsado());
-                Tablero[i][e].setVisible(tablero[i][e].getVisible());
-                Tablero[i][e].setPresionado(tablero[i][e].getPresionado());
-
-                Tablero[i][e].invalidate();
-            }
-        }
-
-        CustomAdapter adapter = new CustomAdapter();
-        grid.setAdapter(adapter);
+        return ContadorBombas;
     }
 
-    public void setGrid(GridView grid) {
+    public void setContadorBombas(int contadorBombas) {
 
-        this.grid = grid;
+        ContadorBombas = contadorBombas;
     }
 
-    public GridView getGrid(){
+    public int getNBombas() {
 
-        return grid;
+        return NBombas;
+    }
+
+    public void setNBombas(int NBombas) {
+        this.NBombas = NBombas;
+    }
+
+    public boolean isCambioDeEstado() {
+
+        return CambioDeEstado;
+    }
+
+    public void setCambioDeEstado(boolean cambioDeEstado) {
+        CambioDeEstado = cambioDeEstado;
     }
 }

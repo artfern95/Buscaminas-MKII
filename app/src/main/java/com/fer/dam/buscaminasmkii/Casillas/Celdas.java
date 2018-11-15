@@ -1,151 +1,188 @@
 package com.fer.dam.buscaminasmkii.Casillas;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
+import com.fer.dam.buscaminasmkii.Casillas.Iconos.Iconos;
 import com.fer.dam.buscaminasmkii.LogicaJuego;
 
-/**Clase abstracta que proporciona los posibles estado de la celda asi como sus
- * valor posicion en entero, X e Y, y su valor como celda
- *
- * Created by artfe on 10/12/2017.
- */
+public class Celdas extends Celda implements View.OnLongClickListener, View.OnClickListener {
 
-public abstract class Celdas extends View {
+    public Celdas(Context context, int pos) {
 
-    private int x;
-    private int y;
-    private int posicion;
-    private int valor;
+        super(context, pos);
+    }
 
-    private boolean Bomba;
-    private boolean Visible;
-    private boolean Pulsado;
-    private boolean Presionado;
+    public Celdas(Context context, AttributeSet attrs) {
+
+        super(context, attrs);
+        setOnClickListener(this);
+        setOnLongClickListener(this);
+    }
 
     public Celdas(Context context) {
 
         super(context);
+        setOnClickListener(this);
+        setOnLongClickListener(this);
     }
 
-    //METODOS GET
+    public Celdas(Context context, int x, int y) {
 
-    public int getXp(){
-
-        return x;
+        super(context, x, y);
+        setOnClickListener(this);
+        setOnLongClickListener(this);
     }
 
-    public int getYp(){
+    //Listener para responder a los eventos
 
-        return y;
+    @Override
+    public void onClick(View view) {
+
+        LogicaJuego.getInstance().Pulsado(getXp(), getYp());
+        Log.i("OnClick", "Celda pulsada: " + getPosicion() + " , " + "con valor: " + getValor());
     }
 
-    public int getPosicion(){
+    @Override
+    public boolean onLongClick(View v) {
 
-        return posicion;
+        LogicaJuego.getInstance().Presionado(getXp(), getYp());
+        Log.i("OnLongClick", "Celda presionada: " + getPosicion() + " , " + "con valor: " + getValor());
+        return false;
     }
 
-    public int getValor(){
+    //Métodos para dibujar las celdas
 
-        return valor;
+    @Override
+    protected void onDraw(Canvas canvas) {
+
+        /*Este es un método es heredado de la clase View
+         * Renderiza las casillas segun el valor de celda, bomba, números*/
+
+        super.onDraw(canvas);
+
+        CeldaLibre(canvas);
+
+        Log.e("Celda", "Dibujando");
+
+        //OnLongClick
+
+        if (getPresionado() == true && getBomba() == true) {
+
+            BombaEncontrada(canvas);
+        } else if (getVisible() == true && getBomba() == true && getPulsado() == false) {
+            BombaEncontrada(canvas);
+        } else {
+
+            if (getPulsado()) {
+
+                if (getValor() == 9) {
+                    BombaExplota(canvas);
+                    //vibrator.vibrate(230);
+                } else {
+                    ValorCelda(canvas);
+                }
+            } else {
+
+                CeldaLibre(canvas);
+            }
+        }
     }
 
-    public boolean getBomba(){
+    /*Representa el número de bombas que tiene cerca
+     * para ello coje su valor de getValor()*/
 
-        return Bomba;
-    }
+    private void ValorCelda(Canvas canvas) {
 
-    public boolean getVisible(){
+        Drawable drawable = null;
+        Drawable back = null;
 
-        return Visible;
-    }
+        Log.e("Celda", "Asignando Valor: " + getValor());
 
-    public boolean getPulsado(){
+        //Según el valor de la casilla, dibuja la imagen con el valor
 
-        return Pulsado;
-    }
+        back = getIconos().getCeldaBlanca();
 
-    public boolean getPresionado(){
+        switch (getValor()) {
 
-        return Presionado;
-    }
-
-    //METODOS SET
-
-    public void setPosicion(int posicion){
-
-        x = posicion % LogicaJuego.Ancho;
-        y = posicion / LogicaJuego.Largo;
-    }
-
-    public void setPosicion(int x, int y){
-
-        this.x = x;
-        this.y = y;
-
-        posicion = x * LogicaJuego.Ancho + y;
-
-        invalidate();
-
-        //necesario para evitar problemas en el redibujado
-    }
-
-    public void setValor(int valor){
-
-        Bomba = false;
-        Visible = false;
-        Pulsado = false;
-        Presionado = false;
-
-        if(valor == 9){
-
-            Bomba = true;
+            case 1:
+                drawable = getIconos().getNum1();
+                break;
+            case 2:
+                drawable = getIconos().getNum2();
+                break;
+            case 3:
+                drawable = getIconos().getNum3();
+                break;
+            case 4:
+                drawable = getIconos().getNum4();
+                break;
+            case 5:
+                drawable = getIconos().getNum5();
+                break;
+            case 6:
+                drawable = getIconos().getNum6();
+                break;
+            case 7:
+                drawable = getIconos().getNum7();
+                break;
+            case 8:
+                drawable = getIconos().getNum8();
+                break;
+            case 9:
+                drawable = getIconos().getBomba();
+                break;
+            case 0:
+                drawable = getIconos().getCeldaVacia();
+                break;
         }
 
-        this.valor = valor;
+        back.setBounds(0, 0, getWidth(), getHeight());
+        drawable.setBounds(0, 0, getWidth(), getHeight());
+        back.draw(canvas);
+        drawable.draw(canvas);
+
     }
 
-    public void setBomba(boolean valor){
+    //Métodos para dibujar las celdas
 
-        Bomba = valor;
+    //Se incluye la imagen de fondo (back), para evitar formas extrañas
+
+    //Dibuja la bomba cuando explota
+
+    protected void BombaExplota(Canvas canvas) {
+
+        Drawable back = getIconos().getCeldaBlanca();
+        Drawable drawable = getIconos().getBombaExplota();
+        drawable.setBounds(0, 0, getWidth(), getHeight());
+        back.setBounds(0, 0, getWidth(), getHeight());
+        back.draw(canvas);
+        drawable.draw(canvas);
     }
 
-    public void setVisible(){
+    private void BombaEncontrada(Canvas canvas) {
 
-        Visible = true;
+        Drawable back = getIconos().getCeldaBlanca();
+        Drawable drawable = getIconos().getBomba();
+        drawable.setBounds(0, 0, getWidth(), getHeight());
+        back.setBounds(0, 0, getWidth(), getHeight());
+        back.draw(canvas);
+        drawable.draw(canvas);
     }
 
-    public void setVisible(boolean valor){
+    //Dibuja la cara en blanco de la celdas
 
-        Visible = valor;
-    }
+    private void CeldaLibre(Canvas canvas) {
 
-    public void setPulsado (){
-
-        Pulsado = true;
-        Visible = true;
-
-        invalidate();
-    }
-
-    public void setPulsado(boolean tipo){
-
-        Pulsado = tipo;
-
-        invalidate();
-    }
-
-    public void setPresionado(boolean valor){
-
-        Presionado = valor;
-
-        invalidate();
-    }
-
-    public void setPresionado (){
-
-        Presionado = true;
-        Visible = true;
-        invalidate();
+        Drawable back = getIconos().getCeldaBlanca();
+        Drawable drawable = getIconos().getBoton();
+        back.setBounds(0, 0, getWidth(), getHeight());
+        drawable.setBounds(0, 0, getWidth(), getHeight());
+        back.draw(canvas);
+        drawable.draw(canvas);
     }
 }

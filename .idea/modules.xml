@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Buscaminas-MKII(Dev).iml" filepath="$PROJECT_DIR$/Buscaminas-MKII(Dev).iml" />
       <module fileurl="file://$PROJECT_DIR$/BuscaminasMKII.iml" filepath="$PROJECT_DIR$/BuscaminasMKII.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

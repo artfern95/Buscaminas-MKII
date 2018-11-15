@@ -9,7 +9,6 @@ import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosClasicos;
 import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialBlack;
 import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialColor;
 import com.fer.dam.buscaminasmkii.Casillas.Iconos.IconosMaterialWhite;
-import com.fer.dam.buscaminasmkii.Layout.CustomAdapter;
 import com.fer.dam.buscaminasmkii.LogicaJuego;
 import com.fer.dam.buscaminasmkii.MainActivity;
 
