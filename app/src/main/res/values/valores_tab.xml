@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="AnchoFacil">8</integer>
+    <integer name="LargoFacil">8</integer>
+    <integer name="BombasFacil">11</integer>
+
+    <integer name="AnchoMedio">11</integer>
+    <integer name="LargoMedio">11</integer>
+    <integer name="BombasMedio">23</integer>
+
+    <integer name="AnchoDificil">12</integer>
+    <integer name="LargoDificil">30</integer>
+    <integer name="BombasDificil">45</integer>
+</resources>

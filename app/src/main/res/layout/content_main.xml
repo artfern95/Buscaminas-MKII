@@ -9,12 +9,11 @@
     tools:context="com.fer.dam.buscaminasmkii.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <GridView
-        android:id="@+id/GridView"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
