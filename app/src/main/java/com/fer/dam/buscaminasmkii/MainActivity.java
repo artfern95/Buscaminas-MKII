@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,27 +25,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Adapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.fer.dam.buscaminasmkii.Adapter.CellAdapter;
 import com.fer.dam.buscaminasmkii.SettingsActivity.SettingsActivity;
 
 import org.xml.sax.ext.LexicalHandler;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private GridView grid;
     private Toolbar toolbar;
-    public static int nivel;
-    public static int tipo;
-    private Context context;
     private SaveInstance datos;
     private FragmentManager fragmentManager;
-    public static int contadorbombas;
+
     public static boolean modorotacion;
     public static boolean orientacion;
+
     private boolean cambios = false;
     private boolean cambiorientacion = false;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
+    private CellAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        fragmentManager = getFragmentManager();
+        datos = (SaveInstance) fragmentManager.findFragmentByTag("datos");
+
+        if (datos == null) {
+
+            datos = new SaveInstance();
+            fragmentManager.beginTransaction().add(datos, "datos").commit();
+        }
 
         Log.i("Estado","onCreate");
 
@@ -63,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 Snackbar.make(view, R.string.juego, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                LogicaJuego.getInstance().CrearTablero(context,grid);
+                LogicaJuego.getInstance().ReiniciarTablero();
                 cambios = false;
             }
         });
@@ -79,30 +93,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        grid = (GridView)findViewById(R.id.GridView);
-        context = this;
+        recyclerView = findViewById(R.id.RecyclerView);
+        LogicaJuego.getInstance().CrearTablero(this, datos, layoutManager, recyclerView, adapter);
 
-        //orientacion = false;
-        tipo = 2;
-        nivel = 1;
-        modorotacion = false;
-        //setcolor(tipo);
+        adapter = new CellAdapter(this);
+        layoutManager = new GridLayoutManager(this, LogicaJuego.getInstance().getLargo());
 
-        //Inicio el juego
+        recyclerView.setLayoutManager(layoutManager);
 
-        LogicaJuego.getInstance().CrearTablero(this,grid);
-
-        //Aqui creamos un fragment para guardar los datos cuando se produce un cambio en tiempo de ejecucion
-
-        fragmentManager = getFragmentManager();
-        datos = (SaveInstance) fragmentManager.findFragmentByTag("datos");
-
-        if(datos == null){
-
-            datos = new SaveInstance();
-            fragmentManager.beginTransaction().add(datos,"datos").commit();
-            datos.GuardarDatos(LogicaJuego.getInstance().getTablero(),tipo,nivel,LogicaJuego.Largo,LogicaJuego.Ancho,contadorbombas);
-        }
+        recyclerView.setAdapter(adapter);
+        setcolor(3);
     }
 
     //Llamamos al metodo para guardar la instacia
@@ -112,12 +112,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onSaveInstanceState(outState);
         cambios = false;
         Log.i("Estado","onSaveInstance");
-        datos.GuardarDatos(LogicaJuego.getInstance().getTablero(),tipo,nivel,LogicaJuego.Largo,LogicaJuego.Ancho,contadorbombas);
+        LogicaJuego.getInstance().GuardarTablero();
     }
 
     //Metodo para manejar los cambios en tiempo de ejecucion, no solo la orientacion
 
-    public void AplicarAjustes(){
+    public void AplicarAjustes() {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String largo = sharedPreferences.getString("Pref_largo","");
@@ -132,44 +132,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if(Largo >= 9 && Largo <= 27 && Ancho >= 9 && Ancho <= 37 && Bomba >= 15 && Bomba <= 77 ){
 
-            LogicaJuego.Ancho = Ancho;
-            LogicaJuego.Largo = Largo;
-            LogicaJuego.Nbombas = Bomba;
+            LogicaJuego.getInstance().setAncho(Ancho);
+            LogicaJuego.getInstance().setLargo(Largo);
+            LogicaJuego.getInstance().setNBombas(Bomba);
 
-            LogicaJuego.getInstance().CrearTableroPersonalizado(this,grid);
+            //LogicaJuego.getInstance().CrearTableroPersonalizado(this,grid);
 
             String texto = getResources().getString(R.string.tablero)+getResources().getString(R.string.largotext)+Largo+" | "+getResources().getString(R.string.anchotext)+Ancho+" | "+getResources().getString(R.string.bombas)+" : "+Bomba;
             Toast.makeText(this,texto, Toast.LENGTH_SHORT).show();
         }
 
         else{
-            LogicaJuego.getInstance().CrearTablero(this,grid);
+
+            //LogicaJuego.getInstance().CrearTablero(this,grid);
         }
     }
 
+    /*
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         Log.i("Estado","onConfigurtionChange");
 
-        datos.GuardarDatos(LogicaJuego.getInstance().getTablero(),tipo,nivel,LogicaJuego.Largo,LogicaJuego.Ancho,contadorbombas);
+        LogicaJuego.getInstance().GuardarTablero();
         Log.i("Estado","Guardando tablero: "+datos.getTablero().length);
-        grid = (GridView)findViewById(R.id.GridView);
+        //grid = (GridView)findViewById(R.id.GridView);
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
             modorotacion = true;
 
             if(orientacion==true) {
-                LogicaJuego.getInstance().RestaurarTableroHorizontal(datos.getTablero(), grid, datos.getTipo(), datos.getLargo(), datos.getAncho(), this);
-                contadorbombas = datos.getNbombasres();
+
+                LogicaJuego.getInstance().RestaurarTableroHV(true);
                 Log.i("Orientacion","Invertir matriz");
             }
+
             else{
-                LogicaJuego.getInstance().RestaurarTablero(datos.getTablero(),grid,datos.getTipo(),datos.getLargo(),datos.getAncho(),this);
-            contadorbombas = datos.getNbombasres();
-            Log.i("Orientacion","Normal");
+
+                LogicaJuego.getInstance().RestaurarTablero();
+                Log.i("Orientacion","Normal");
             }
         }
 
@@ -178,18 +181,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             modorotacion = false;
 
             if (orientacion==true) {
-                LogicaJuego.getInstance().RestaurarTableroVertical(datos.getTablero(), grid, datos.getTipo(), datos.getLargo(), datos.getAncho(), this);
-                contadorbombas = datos.getNbombasres();
+
+                LogicaJuego.getInstance().RestaurarTableroHV(false);
                 Log.i("Orientacion","Invertir matriz");
             }
+
             else {
-                LogicaJuego.getInstance().RestaurarTablero(datos.getTablero(), grid, datos.getTipo(), datos.getLargo(), datos.getAncho(), this);
-                contadorbombas = datos.getNbombasres();
+
+                LogicaJuego.getInstance().RestaurarTablero();
                 Log.i("Orientacion", "Normal");
             }
         }
     }
 
+    */
     //Establece el fondo de la aplicacion en funcion de lo iconoos usados
 
     private void setcolor(int tipo){
@@ -211,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //respuesta al pusar la tecla atras
 
-    @Override
-    protected void onResume() {
+    //@Override
+    /*protected void onResume() {
 
         super.onResume();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -221,15 +226,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i("Estado","onResume");
 
         if(datos != null) {
-            LogicaJuego.getInstance().RestaurarTablero(datos.getTablero(), grid, datos.getTipo(), datos.getLargo(), datos.getAncho(), this);
-            contadorbombas = datos.getNbombasres();
+
+            LogicaJuego.getInstance().RestaurarTablero();
         }
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
 
+        super.onDestroy();
         datos = null;
     }
 
@@ -238,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         super.onStop();
         Log.i("Estado","onStop");
-        datos.GuardarDatos(LogicaJuego.getInstance().getTablero(),tipo,nivel,LogicaJuego.Largo,LogicaJuego.Ancho,contadorbombas);
+        LogicaJuego.getInstance().GuardarTablero();
     }
 
     @Override
@@ -246,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         super.onPause();
         Log.i("Estado","onPause");
-        datos.GuardarDatos(LogicaJuego.getInstance().getTablero(),tipo,nivel,LogicaJuego.Largo,LogicaJuego.Ancho,contadorbombas);
+        LogicaJuego.getInstance().GuardarTablero();
     }
 
     @Override
@@ -256,17 +261,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i("Estado","onRestart");
 
         if(datos != null){
-            LogicaJuego.getInstance().RestaurarTablero(datos.getTablero(),grid,datos.getTipo(),datos.getLargo(),datos.getAncho(),this);
-            contadorbombas = datos.getNbombasres();
+
+            LogicaJuego.getInstance().GuardarTablero();
         }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
+
             drawer.closeDrawer(GravityCompat.START);
         } else {
+
             super.onBackPressed();
         }
     }
@@ -294,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 AlertDialog.Builder puntuacion = new AlertDialog.Builder(this);
 
-                puntuacion.setMessage(getResources().getString(R.string.puntuacion)+": "+MainActivity.contadorbombas).setTitle(getResources().getString(R.string.puntuacion
+                puntuacion.setMessage(getResources().getString(R.string.puntuacion) + ": " + LogicaJuego.getInstance().getContadorBombas()).setTitle(getResources().getString(R.string.puntuacion
                 ));
                 puntuacion.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -363,22 +372,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else if (id == R.id.NavBardificil) {
 
             cambios = false;
-            nivel = 3;
-            LogicaJuego.getInstance().CrearTablero(context,grid);
+            LogicaJuego.getInstance().setNivel(3);
+            LogicaJuego.getInstance().ReiniciarTablero();
         }
 
         else if (id == R.id.NavBarmedio) {
 
             cambios = false;
-            nivel = 2;
-            LogicaJuego.getInstance().CrearTablero(context,grid);
+            LogicaJuego.getInstance().setNivel(2);
+            LogicaJuego.getInstance().ReiniciarTablero();
         }
 
         else if (id == R.id.NavBarfacil) {
 
             cambios = false;
-            nivel = 1;
-            LogicaJuego.getInstance().CrearTablero(context,grid);
+            LogicaJuego.getInstance().setNivel(1);
+            LogicaJuego.getInstance().ReiniciarTablero();
         }
 
         else if (id == R.id.NavBarOpciones) {
@@ -387,33 +396,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         else if(id==R.id.IconosClasicos){
 
-            tipo = 1;
-            LogicaJuego.getInstance().GuardarTablero(grid);
+            LogicaJuego.getInstance().setTipoIcono(1);
+            LogicaJuego.getInstance().CambiarIconos();
             setcolor(3);
         }
 
         else if(id==R.id.IconosMaterialb){
 
-            tipo = 2;
-            LogicaJuego.getInstance().GuardarTablero(grid);
+            LogicaJuego.getInstance().setTipoIcono(2);
+            LogicaJuego.getInstance().CambiarIconos();
             setcolor(2);
         }
 
         else if(id==R.id.IconosMaterialC){
 
-            tipo = 4;
-            LogicaJuego.getInstance().GuardarTablero(grid);
+            LogicaJuego.getInstance().setTipoIcono(3);
+            LogicaJuego.getInstance().CambiarIconos();
             setcolor(2);
         }
 
         else if(id==R.id.IconosMaterialw){
 
-            tipo = 3;
-            LogicaJuego.getInstance().GuardarTablero(grid);
+            LogicaJuego.getInstance().setTipoIcono(4);
+            LogicaJuego.getInstance().CambiarIconos();
             setcolor(1);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
