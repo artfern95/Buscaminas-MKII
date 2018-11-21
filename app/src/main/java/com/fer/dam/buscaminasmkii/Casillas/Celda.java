@@ -1,4 +1,4 @@
-package com.fer.dam.buscaminasmkii.Casillas;n
+package com.fer.dam.buscaminasmkii.Casillas;
 
 import android.content.Context;
 import android.graphics.Canvas;

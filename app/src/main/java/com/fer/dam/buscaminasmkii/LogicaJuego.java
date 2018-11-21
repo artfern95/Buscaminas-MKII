@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.fer.dam.buscaminasmkii.Casillas.Celda;
 import com.fer.dam.buscaminasmkii.Casillas.Iconos.Iconos;
@@ -241,11 +242,16 @@ public class LogicaJuego{
     public void Presionado(int x, int y){
 
         getCeldapos(x,y).setPresionado();
-        getCeldapos(x,y).invalidate();
 
-        if(getCeldapos(x,y).getBomba() == true){
+        if(getCeldapos(x,y).getBomba() == true && getCeldapos(x,y).getVisible() == true) {
+
+            Toast.makeText(context,"Esta celda ya esta visible",Toast.LENGTH_SHORT).show();
+        }
+
+        if(getCeldapos(x,y).getBomba() == true && getCeldapos(x,y).getVisible() != true){
 
             getCeldapos(x,y).setVisible();
+            getCeldapos(x,y).invalidate();
             MainActivity.contadorbombas = MainActivity.contadorbombas - 1;
             Log.i("Presionado","Quedan: "+MainActivity.contadorbombas+" bombas");
             RevisarFin();
@@ -254,6 +260,8 @@ public class LogicaJuego{
         else {
 
             FinDelJuego();
+            getCeldapos(x,y).setVisible();
+            getCeldapos(x,y).invalidate();
         }
     }
 

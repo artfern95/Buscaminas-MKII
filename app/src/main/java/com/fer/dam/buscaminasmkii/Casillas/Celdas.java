@@ -142,10 +142,10 @@ public abstract class Celdas extends View {
         invalidate();
     }
 
-    public void setPresionado (){
+    public void setPresionado () {
 
         Presionado = true;
-        Visible = true;
+
         invalidate();
     }
 }
